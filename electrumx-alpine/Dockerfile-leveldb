@@ -1,0 +1,99 @@
+# The electrumx build is seperated by the build itself and the container creation.
+# The seperation allows to shrink the container size as no build stuff is carried over.
+# Furthermore a sperated build allows using the same build for leveldb and rocksdb
+
+FROM alpine:edge as builder
+
+ENV ELECTRUMX_VERSION=1.2
+ENV TESTING_REPO="http://dl-cdn.alpinelinux.org/alpine/edge/testing"
+ENV BUILD_DEPENDENCIES="openssl gcc git g++ leveldb-dev python3-dev rocksdb-dev wget"
+ENV PACKAGES="daemontools leveldb rocksdb python3"
+
+    # Setting up testing repository for leveldb, rocksdb and daemontools
+RUN grep -q -F "${TESTING_REPO}" /etc/apk/repositories || echo "${TESTING_REPO}" >> /etc/apk/repositories && \
+    apk --no-cache add ${PACKAGES} ${BUILD_DEPENDENCIES} && \
+    # Installing Python Dependencies
+    python3 -m pip install plyvel && \
+    python3 -m pip install "Cython>=0.20" && \
+	python3 -m pip install git+git://github.com/stephan-hof/pyrocksdb.git && \
+    python3 -m pip install multidict && \
+    ln -s $(which python3.6) /usr/local/bin/python3 && \
+    # Installing electrumx
+    wget https://github.com/kyuupichan/electrumx/archive/${ELECTRUMX_VERSION}.tar.gz -P /tmp/ && \
+    tar -xf /tmp/${ELECTRUMX_VERSION}.tar.gz -C /tmp/ && \
+    mv /tmp/electrumx-${ELECTRUMX_VERSION} /tmp/electrumx && \
+    cd /tmp/electrumx && \
+    python3 setup.py install && \
+    # Keeping daemontools scripts
+    mkdir -p /service/ && \
+    mv /tmp/electrumx/contrib/daemontools /service/electrumx && \
+    # Saving build artifacts
+    tar -cf /tmp/artifacts.tar \
+        # daemontool artificats
+        /service/electrumx \
+        # electrum artificats
+        /usr/bin/electrumx_server.py \
+        # python artifacts
+        /usr/lib/python3.6/site-packages/aiohttp-*.egg \
+        /usr/lib/python3.6/site-packages/async_timeout-*.egg \
+        /usr/lib/python3.6/site-packages/chardet-*.egg \
+        /usr/lib/python3.6/site-packages/electrumx-*.egg \
+        /usr/lib/python3.6/site-packages/inflect-*.egg \
+        /usr/lib/python3.6/site-packages/irc-*.egg \
+        /usr/lib/python3.6/site-packages/jaraco.classes-*.egg \
+        /usr/lib/python3.6/site-packages/jaraco.collections-*.egg \
+        /usr/lib/python3.6/site-packages/jaraco.functools-*.egg \
+        /usr/lib/python3.6/site-packages/jaraco.itertools-*.egg \
+        /usr/lib/python3.6/site-packages/jaraco.logging-*.egg \
+        /usr/lib/python3.6/site-packages/jaraco.stream-*.egg \
+        /usr/lib/python3.6/site-packages/jaraco.text-*.egg \
+        /usr/lib/python3.6/site-packages/more_itertools-*.egg \
+        /usr/lib/python3.6/site-packages/multidict \
+        /usr/lib/python3.6/site-packages/multidict-*.egg-info \
+        /usr/lib/python3.6/site-packages/plyvel \
+        /usr/lib/python3.6/site-packages/plyvel-*.egg-info \
+        /usr/lib/python3.6/site-packages/pylru-*.egg \
+        /usr/lib/python3.6/site-packages/pytz-*.egg \
+        /usr/lib/python3.6/site-packages/six-*.egg \
+        /usr/lib/python3.6/site-packages/tempora-*.egg \
+        /usr/lib/python3.6/site-packages/yarl-*.egg
+
+FROM alpine:edge
+LABEL maintainer="Marc Mettke <marc@itmettke.de>"
+
+ENV TESTING_REPO="http://dl-cdn.alpinelinux.org/alpine/edge/testing"
+ENV PACKAGES="daemontools leveldb python3"
+ENV DB_DIRECTORY="/db"
+ENV ELECTRUMX="/usr/bin/electrumx_server.py"
+ENV USERNAME="electrumx"
+ENV DB_ENGINE="leveldb"
+
+COPY --from=builder /tmp/artifacts.tar /tmp/artifacts.tar
+
+    # Extracting Artifacts
+RUN tar -xf /tmp/artifacts.tar -C / && \
+    # Setting up testing repository for leveldb, rocksdb and daemontools
+    grep -q -F "${TESTING_REPO}" /etc/apk/repositories || echo "${TESTING_REPO}" >> /etc/apk/repositories && \
+    apk --no-cache add ${PACKAGES} && \
+    # Preparing Python
+    ln -s $(which python3.6) /usr/local/bin/python3 && \
+    # Setting up daemontools
+    mkdir -p /log /db /env /certs && \
+    rm -rf /service/electrumx/env && \
+    ln -s /env /service/electrumx/env && \
+    chmod +x /service/electrumx/run /service/electrumx/log/run && \
+    sed -i '$d' /service/electrumx/log/run && \
+    sed -i '$a\exec multilog t s500000 n10 /log' /service/electrumx/log/run && \
+    # user setup
+    adduser -D electrumx && \
+    chown -R electrumx:electrumx /db /log /env /certs /service && \
+    # Cleaning up
+    rm /tmp/artifacts.tar
+
+EXPOSE 50001
+EXPOSE 50002
+VOLUME /db /log /env /certs
+
+ENTRYPOINT [ "/usr/bin/svscan" ]
+CMD [ "/service" ]
+HEALTHCHECK CMD /usr/bin/svstat /service/electrumx || exit 1

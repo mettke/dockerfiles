@@ -1,7 +1,9 @@
 # Supported tags and respective `Dockerfile` links
 
--	[`1.2-leveldb`, `leveldb` (*Dockerfile*)](https://github.com/mettke/dockerfiles/blob/electrumx-alpine_1.2/electrumx-alpine/Dockerfile-leveldb)
--	[`1.2-rocksdb`, `rocksdb` (*Dockerfile*)](https://github.com/mettke/dockerfiles/blob/electrumx-alpine_1.2/electrumx-alpine/Dockerfile-rocksdb)
+-	[`1.2.1-leveldb`, `leveldb` (*Dockerfile*)](https://github.com/mettke/dockerfiles/blob/electrumx-alpine_1.2.1/electrumx-alpine/Dockerfile-leveldb)
+-	[`1.2.1-rocksdb`, `rocksdb` (*Dockerfile*)](https://github.com/mettke/dockerfiles/blob/electrumx-alpine_1.2.1/electrumx-alpine/Dockerfile-rocksdb)
+-	[`1.2-leveldb` (*Dockerfile*)](https://github.com/mettke/dockerfiles/blob/electrumx-alpine_1.2/electrumx-alpine/Dockerfile-leveldb)
+-	[`1.2-rocksdb` (*Dockerfile*)](https://github.com/mettke/dockerfiles/blob/electrumx-alpine_1.2/electrumx-alpine/Dockerfile-rocksdb)
 
 Tags are supported for up to 1 year. Afterwards they may be removed any time.
 
@@ -23,7 +25,7 @@ ElectrumX started as an alternative implementation of the original [electrum-ser
 
 ## Run ElectrumX Server
 
-The ElectrumX Daemon can be either with leveldb or rocksdb. The following command will start the Server with leveldb:
+The ElectrumX Daemon can be used either with leveldb or rocksdb. The following command will start the Server with leveldb:
 
 ```console
 docker run --name ElectrumX \
@@ -95,25 +97,30 @@ electrumX:
   - "50001:50001"
   - "50002:50002" 
   environment:
+    COIN: BitcoinCash
+    NET: mainnet
+    DAEMON_URL: http://username:password@host:port/
+    HOST: ""
     SSL_CERTFILE: /certs/cert.crt
     SSL_KEYFILE: /certs/key.key
     TCP_PORT: 50001
     SSL_PORT: 50002
-    HOST: ""
   volumes:
   - /path/to/electrumx/db:/db
   - /path/to/electrumx/certs:/certs:ro
   - /path/to/electrumx/log:/log
 ```
 
-## Logs
-
-By default a logfile called *debug.log* is created under the datadir. To read it, you may want to use a command like this:
-
-```
-tail -f /path/to/bitcoin/datadir/debug.log
-```
-
 ## DB_ENGINE and database switch
 
 ElectrumX uses the environment variable *DB_ENGINE* to specify which database to use. Do *not* change the value of that variable as it might lead to errors. Instead use the corresponding tag to ensure that all dependencies are installed. Furthermore before changing the database it is necessary to remove the old one for a complete resync.
+
+## Volume Permission
+
+ElectrumX requires write access to the */log* and *./db* volume. The Server itself is running with the User *electrumx* using UID and GID *1000*. Write Access is therefore a matter of using:
+
+```console
+chown 1000:1000 \ 
+      /path/to/electrumx/db \
+      /path/to/electrumx/log
+```

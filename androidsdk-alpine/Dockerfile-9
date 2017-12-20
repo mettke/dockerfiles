@@ -1,0 +1,35 @@
+FROM alpine:latest
+LABEL maintainer="Marc Mettke <marc@itmettke.de>"
+
+ENV ANDROID_SDK_HOME /android
+ENV ANDROID_SDK_ROOT /android
+ENV ANDROID_NDK_HOME /android/ndk-bundle
+ENV ANDROID_NDK_ROOT /android/ndk-bundle
+ENV ANDROID_HOME /android
+ENV ANDROID_SDK /android
+ENV ANDROID_PLATTFORM "platforms;android-9"
+ENV PATH ${PATH}:${ANDROID_SDK_HOME}/tools/bin
+
+RUN apk --quiet --no-cache add openjdk8 git expect && \
+    mkdir "${ANDROID_SDK_HOME}" && \
+    # sdk download
+    wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -P /tmp/ && \
+    unzip /tmp/sdk-tools-linux-3859397.zip -d "${ANDROID_SDK_HOME}" && \
+    # get list of all packages
+    sdkmanager --list --verbose | \
+        # Remove empty and unrelevant lines
+        sed '/^ /d' | sed '/^$/d' | \
+        # Remove system images, sources, platforms 
+        sed '/^system-images;/d' | sed '/^sources;/d' | sed '/^platforms;/d' | \
+        # Remove head and tail
+        sed  '1,/Available Packages:/d' | sed -n -e '/Available Updates:/,$!p' | tail -n +2 > /tmp/packages && \
+    echo "${ANDROID_PLATTFORM}" >> /tmp/packages && \
+    # sdk installation
+    expect -c 'spawn sdkmanager --verbose --package_file=/tmp/packages ; expect "(y/N)" { send -- "y\r" ; exp_continue ; }' && \
+    # cleaning up
+    rm /tmp/sdk-tools-linux-3859397.zip && \
+    rm /tmp/packages && \
+    apk del expect
+
+WORKDIR /data
+CMD ["/bin/ash"]

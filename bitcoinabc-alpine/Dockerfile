@@ -2,7 +2,7 @@ FROM alpine:latest
 LABEL maintainer="Marc Mettke <marc@itmettke.de>"
 
 ENV GLIBC_VERSION=2.26-r0
-ENV BITCOIN_VERSION=0.16.1
+ENV BITCOIN_VERSION=0.16.2
 
 RUN apk --no-cache add openssl libgcc && \
     # glibc installation
@@ -12,7 +12,7 @@ RUN apk --no-cache add openssl libgcc && \
     apk add --no-cache /tmp/glibc-${GLIBC_VERSION}.apk && \
     apk add --no-cache /tmp/glibc-bin-${GLIBC_VERSION}.apk && \
     # bitcoin-abc installation
-    wget https://download.bitcoinabc.org/0.16.1/linux/bitcoin-abc-${BITCOIN_VERSION}-x86_64-linux-gnu.tar.gz -P /tmp/ && \
+    wget https://download.bitcoinabc.org/${BITCOIN_VERSION}/linux/bitcoin-abc-${BITCOIN_VERSION}-x86_64-linux-gnu.tar.gz -P /tmp/ && \
     tar -xvf /tmp/bitcoin-abc-${BITCOIN_VERSION}-x86_64-linux-gnu.tar.gz && \
     mv bitcoin-abc-${BITCOIN_VERSION} bitcoin-abc && \
     # cleaning up

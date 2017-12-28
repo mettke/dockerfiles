@@ -29,7 +29,10 @@ Bitcoin-ABC is the official Bitcoin Client for BitcoinCash. It allows creating a
 The Bitcoin Daemon can be started with the following command:
 
 ```console
-docker run --name BitcoinABC --volume /path/to/bitcoin/datadir:/data --publish 8333:8333 --detach toendeavour/bitcoinabc-alpine
+docker run --name BitcoinABC \
+           --volume /path/to/bitcoin/datadir:/data \
+           --publish 8333:8333 \
+           --detach toendeavour/bitcoinabc-alpine
 ```
 
 It requires a Volume to store the database and the daemon configuration file. Furthermore the Port 8333 has to be published to allow other Nodes to connect.
@@ -39,7 +42,10 @@ It requires a Volume to store the database and the daemon configuration file. Fu
 The Port 8334 can be published or exposed to allow a Bitcoin Client to connect to the Node. The following command will publish that port to the outside. You may want to consider only exposing it to prevent unwanted access.
 
 ```console
-docker run --name BitcoinABC --volume /path/to/bitcoin/datadir:/data --publish 8333:8333 --publish 8334:8334 --detach toendeavour/bitcoinabc-alpine
+docker run --name BitcoinABC \
+           --volume /path/to/bitcoin/datadir:/data \
+           --publish 8333:8333 --publish 8334:8334 \
+           --detach toendeavour/bitcoinabc-alpine
 ```
 
 To enable the RPC it is necessary to modify (create if not existing) the *bitcoin.conf* file in the datadir like this:
@@ -77,4 +83,20 @@ bitcoind:
   - "8333:8333"
   volumes:
   - /path/to/bitcoin/datadir:/data
+```
+
+## Logs
+
+By default a logfile called *debug.log* is created under the datadir. To read it, you may want to use a command like this:
+
+```console
+tail -f /path/to/bitcoin/datadir/debug.log
+```
+
+## Volume Permission
+
+The Bitcoin Daemon requires write access to the */data* volume. The Server itself is running with the User *bitcoind* using UID and GID *1000*. Write Access is therefore a matter of using:
+
+```console
+chown 1000:1000 /path/to/bitcoin/datadir
 ```

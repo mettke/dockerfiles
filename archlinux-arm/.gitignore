@@ -1,0 +1,5 @@
+img/*
+!img/mkimg.sh
+!img/pacman.conf
+!img/bin
+

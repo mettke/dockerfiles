@@ -1,0 +1,38 @@
+FROM alpine:latest
+
+ENV ARCHITECTURE="i686"
+ADD https://itmettke.de/.data/.linux/.archlinux-arm/${ARCHITECTURE}/${ARCHITECTURE}.tar.bzip2 /tmp
+
+RUN mkdir /tmp/armChroot && \
+    cd /tmp/armChroot && \
+    tar --extract \
+        --bzip2 \
+        --file=../${ARCHITECTURE}.tar.bzip2 \
+        .
+
+##########
+
+FROM scratch
+
+COPY --from=0 /tmp/armChroot /
+
+RUN echo "Server = http://pool.mirror.archlinux32.org/\$arch/\$repo" > /etc/pacman.d/mirrorlist && \
+    sed -i -e 's/Architecture = auto/Architecture = i686/g' /etc/pacman.conf && \
+    pacman -Sy && pacman -Sqg base | sort -u > /tmp/packages1 && \
+    echo "linux" > /tmp/packages2 && \
+    pacman-key --init && \
+    pacman-key --populate archlinux32 && \
+    pacman --needed --noconfirm -Syu $(comm -23 /tmp/packages1 /tmp/packages2) && \
+    sed -i -e 's/Architecture = i686/Architecture = auto/g' /etc/pacman.conf && \
+    rm -Rf "/var/cache" && \
+    rm -Rf "/var/lib/pacman/sync" && \
+    rm -Rf "/var/log/*" && \
+    rm -Rf "/tmp/*" && \
+    install -m 0755 -d "/var/cache/pacman/pkg" 
+
+##########
+
+FROM scratch
+LABEL maintainer="Marc Mettke <marc@itmettke.de>"
+
+COPY --from=1 / /

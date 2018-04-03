@@ -1,0 +1,35 @@
+FROM alpine:latest
+
+ENV ARCHITECTURE="x86_64"
+ADD https://itmettke.de/.data/.linux/.archlinux-arm/${ARCHITECTURE}/${ARCHITECTURE}.tar.bzip2 /tmp
+
+RUN mkdir /tmp/armChroot && \
+    cd /tmp/armChroot && \
+    tar --extract \
+        --bzip2 \
+        --file=../${ARCHITECTURE}.tar.bzip2 \
+        .
+
+##########
+
+FROM scratch
+
+COPY --from=0 /tmp/armChroot /
+
+RUN echo "Server = https://repo.itmettke.de/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist && \
+    pacman -Sy && pacman -Sqg base | sort -u > /tmp/packages1 && \
+    echo "linux" > /tmp/packages2 && \
+    pacman-key --init && \
+    pacman-key --populate archlinux && \
+    pacman --needed --noconfirm -Syu $(comm -23 /tmp/packages1 /tmp/packages2) && \
+    rm -Rf "/var/cache" && \
+    rm -Rf "/var/lib/pacman/sync" && \
+    rm -Rf "/var/log/*" && \
+    install -m 0755 -d "/var/cache/pacman/pkg" 
+
+##########
+
+FROM scratch
+LABEL maintainer="Marc Mettke <marc@itmettke.de>"
+
+COPY --from=1 / /

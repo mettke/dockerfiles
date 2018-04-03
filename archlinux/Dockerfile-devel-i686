@@ -7,5 +7,5 @@ RUN sed -i -e 's/Architecture = auto/Architecture = i686/g' /etc/pacman.conf && 
     sed -i -e 's/Architecture = i686/Architecture = auto/g' /etc/pacman.conf && \
     rm -Rf "/var/cache" && \
     rm -Rf "/var/lib/pacman/sync" && \
-    rm -Rf "/var/log" && \
+    rm -Rf "/var/log/*" && \
     install -m 0755 -d "/var/cache/pacman/pkg" 

@@ -1,7 +1,0 @@
-img/*
-!img/bin
-!img/mkimg.sh
-!img/pacman.arm.conf
-!img/pacman.i686.conf
-!img/pacman.x86_64.conf
-*.tar.bzip2

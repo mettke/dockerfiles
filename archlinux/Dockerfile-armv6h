@@ -1,9 +1,0 @@
-FROM toendeavour/archlinux:base-armv6h
-
-RUN [ "cross-build-start" ]
-RUN pacman --needed --noconfirm -Syu base && \
-    rm -Rf "/var/cache" && \
-    rm -Rf "/var/lib/pacman/sync" && \
-    rm -Rf "/var/log/*" && \
-    install -m 0755 -d "/var/cache/pacman/pkg" 
-RUN [ "cross-build-end" ]

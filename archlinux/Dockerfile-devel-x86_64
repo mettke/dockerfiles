@@ -1,9 +1,0 @@
-FROM toendeavour/archlinux:x86_64
-
-RUN pacman -Sy && pacman -Sqg base base-devel | sort -u > /tmp/packages1 && \
-    echo "linux" > /tmp/packages2 && \
-    pacman --needed --noconfirm -Syu $(comm -23 /tmp/packages1 /tmp/packages2) && \
-    rm -Rf "/var/cache" && \
-    rm -Rf "/var/lib/pacman/sync" && \
-    rm -Rf "/var/log/*" && \
-    install -m 0755 -d "/var/cache/pacman/pkg" 

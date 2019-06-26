@@ -1,7 +1,7 @@
 FROM alpine:latest
 LABEL maintainer="Marc Mettke <marc@itmettke.de>"
 
-ENV VERSION="v0.6.4"
+ENV VERSION="v0.6.5"
 ENV DEHYDRATED_URL="https://raw.githubusercontent.com/lukas2511/dehydrated/${VERSION}/dehydrated"
 ENV CLOUDFLARE_HOOK_URL="https://github.com/mettke/letsencrypt-cloudflare-hook"
 ENV DEPENDENCIES="bash openssl curl python py-cffi py-cryptography py-dnspython py-enum34 py-future py-idna py-ipaddress py-ndg_httpsclient py2-asn1 py2-cparser py-openssl py-requests py-six py-pip"

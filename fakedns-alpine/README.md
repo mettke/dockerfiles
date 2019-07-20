@@ -1,6 +1,6 @@
 # Supported tags and respective `Dockerfile` links
 
--	[`latest` (*Dockerfile*)](https://github.com/mettke/dockerfiles/blob/fakedns-alpine/rsync-alpine/Dockerfile)
+-	[`latest` (*Dockerfile*)](https://github.com/mettke/dockerfiles/blob/fakedns-alpine/fakedns-alpine/Dockerfile)
 
 ### latest
 
@@ -29,7 +29,7 @@ docker run --name fakedns \
 Here is an example using docker-compose.yml:
 
 ```yaml
-rsyncd:
+fakedns:
   image: toendeavour/fakedns-alpine
   command: 1.1.1.1
   restart: always

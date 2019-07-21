@@ -1,0 +1,13 @@
+--- easyrsa.old
++++ easyrsa
+@@ -1017,8 +1017,8 @@
+                 	;;
+           	*)
+                 	# This works on Windows, too, since uname doesn't exist and this is catch-all
+-                	expire_date=$(date -d "$expire_date" +%s)
+-                	allow_renew_date=$(date -d "+${EASYRSA_CERT_RENEW}day" +%s)
++                        expire_date=$(date -D '%b  %d %T %Y' -d "$expire_date" +%s)
++                        allow_renew_date=$(( `date +%s`+${EASYRSA_CERT_RENEW}*24*60*60 ))
+                 	;;
+         esac
+ 

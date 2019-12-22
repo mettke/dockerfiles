@@ -10,8 +10,21 @@ ENV BUILD_DEPENDENCIES="gcc py-pip python2-dev linux-headers musl-dev libffi-dev
 COPY crontab /var/spool/cron/crontabs/root
 COPY config /etc/dehydrated/config
 
-RUN apk --no-cache add ${DEPENDENCIES} && \
-    pip install asn1 cparser enum34 tld wheel
+RUN : && \
+    apk add --virtual deps ${BUILD_DEPENDENCIES} && \
+    apk --no-cache add ${DEPENDENCIES} && \
+    pip install \
+        asn1 \
+        cparser \
+        dnspython \
+        enum34 \
+        future \
+        pyopenssl \
+        requests \
+        tld \
+        typing \
+        wheel && \
+    apk del deps
 RUN apk --no-cache add git && \
     wget ${DEHYDRATED_URL} \
         --directory-prefix /usr/local/bin/ && \

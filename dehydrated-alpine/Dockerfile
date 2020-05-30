@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.11
 LABEL maintainer="Marc Mettke <marc@itmettke.de>"
 
 ENV VERSION="v0.6.5"

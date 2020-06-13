@@ -7,7 +7,8 @@ COPY entrypoint.sh /entrypoint.sh
 RUN apk --no-cache add \
         easy-rsa \
         ip6tables \
-        openvpn && \
+        openvpn \
+        patch && \
     # https://github.com/OpenVPN/easy-rsa/issues/261
     sed -e '/RANDFILE/ s/^#*/#/' -i \
         /usr/share/easy-rsa/openssl-easyrsa.cnf && \

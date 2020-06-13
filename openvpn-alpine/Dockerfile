@@ -1,4 +1,4 @@
-FROM alpine:3.11
+FROM alpine:latest
 LABEL maintainer="Marc Mettke <marc@itmettke.de>"
 
 COPY easyrsa.patch /tmp/easyrsa.patch

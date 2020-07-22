@@ -4,8 +4,8 @@ LABEL maintainer="Marc Mettke <marc@itmettke.de>"
 ENV VERSION="v0.6.5"
 ENV DEHYDRATED_URL="https://raw.githubusercontent.com/dehydrated-io/dehydrated/${VERSION}/dehydrated"
 ENV CLOUDFLARE_HOOK_URL="https://github.com/mettke/letsencrypt-cloudflare-hook"
-ENV DEPENDENCIES="bash openssl curl python2 py-cffi py-cryptography py-dnspython py-future py-idna py-ipaddress py-ndg_httpsclient py-openssl py-requests py-six py-pip"
-ENV BUILD_DEPENDENCIES="gcc py-pip python2-dev linux-headers musl-dev libffi-dev openssl-dev"
+ENV DEPENDENCIES="bash openssl curl python3 py3-cffi py3-cryptography py3-dnspython py3-future py3-idna py3-ipaddress py3-ndg_httpsclient py3-openssl py3-requests py3-six py3-pip"
+ENV BUILD_DEPENDENCIES="gcc py3-pip python3-dev linux-headers musl-dev libffi-dev openssl-dev"
 
 COPY crontab /var/spool/cron/crontabs/root
 COPY config /etc/dehydrated/config
@@ -16,11 +16,7 @@ RUN : && \
     pip install \
         asn1 \
         cparser \
-        dnspython \
         enum34 \
-        future \
-        pyopenssl \
-        requests \
         tld \
         typing \
         wheel && \

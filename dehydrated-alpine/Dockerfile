@@ -25,8 +25,8 @@ RUN apk --no-cache add git && \
     wget ${DEHYDRATED_URL} \
         --directory-prefix /usr/local/bin/ && \
     chmod +x /usr/local/bin/dehydrated && \
-    git clone ${CLOUDFLARE_HOOK_URL} /etc/dehydrated/hooks/cloudflare/hook.py && \
-    sed -i -e 's|/usr/bin/env python|/usr/bin/env python3|g' letsencrypt-cloudflare-hook/hook.py && \
+    git clone ${CLOUDFLARE_HOOK_URL} /etc/dehydrated/hooks/cloudflare/ && \
+    sed -i -e 's|/usr/bin/env python|/usr/bin/env python3|g' /etc/dehydrated/hooks/cloudflare/hook.py && \
     apk del git 
 
 VOLUME /etc/dehydrated/data
